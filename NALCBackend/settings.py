@@ -79,7 +79,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React development server
+    "http://localhost:3000", "https://nalc.vercel.app/" # React development server
 ]
 
 ROOT_URLCONF = 'NALCBackend.urls'
