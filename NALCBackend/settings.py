@@ -173,10 +173,4 @@ EMAIL_HOST_PASSWORD = 'nalcSupportTeam2023'
 DEFAULT_FROM_EMAIL = 'nalcs723@gmail.com'
 
 
-# # whitenoise
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'Backend/static'),  # Adjust the app name and path accordingly
-# ]
+PORT = int(os.environ.get("PORT", 5000))
