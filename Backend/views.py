@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from langchain.utilities import SQLDatabase
-from langchain.llms import OpenAI
+from langchain_community.utilities import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
+from langchain_openai import OpenAI
 import os
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
