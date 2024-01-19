@@ -24,7 +24,7 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
 # Create the SQLDatabase instance with the MySQL connection URI
 db = SQLDatabase.from_uri(f"mysql://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}", include_tables=["backend_researchpaper"])
 
-llm = OpenAI(temperature=0, verbose=True, model_name ="gpt-3.5-turbo-1106")
+llm = OpenAI(temperature=0, verbose=True)
 
 db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
