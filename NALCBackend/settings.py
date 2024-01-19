@@ -171,6 +171,3 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'nalcs723@gmail.com'
 EMAIL_HOST_PASSWORD = 'nalcSupportTeam2023'
 DEFAULT_FROM_EMAIL = 'nalcs723@gmail.com'
-
-
-PORT = int(os.environ.get("PORT", 5000))
