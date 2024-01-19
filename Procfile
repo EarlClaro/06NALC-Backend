@@ -1,1 +1,1 @@
-web gunicorn NALCBackend.wsgi:application --log-file -
+web gunicorn NALCBackend.wsgi
