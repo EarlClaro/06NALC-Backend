@@ -18,7 +18,7 @@ from django.conf import settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
-
+from django.core.paginator import Paginator
 
 os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
 # Create the SQLDatabase instance with the MySQL connection URI
@@ -38,46 +38,49 @@ def upload_and_replace_data(request):
                 with uploaded_file.open() as file:
                     data = json.load(file)
 
-                    existing_titles = set(researchpaper.objects.values_list('title', flat=True))
+                    batch_size = 100  # Adjust batch size as needed
+                    paginator = Paginator(data, batch_size)
 
-                    # Insert new data from the JSON file
-                    for item in data:
-                        title = item['Title']
-                        record_type_mapping = {
-                            '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
-                            '2 (Thesis/Research)': 'Thesis/Research',
-                            '3 (Project)': 'Project',
-                            # Add mappings for other record types if needed
-                        }
+                    for page_num in paginator.page_range:
+                        batch = paginator.page(page_num)
+                        existing_titles = set(researchpaper.objects.values_list('title', flat=True))
 
-                        classification_mapping = {
-                            '1 (Basic Research, 2 Applied Research)': 'Basic Research',
-                            '2 (Applied Research)': 'Applied Research',
-                            # Add mappings for other classifications if needed
-                        }
-
-                        # Get the record_type and classification from the JSON data
-                        record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
-                        classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
-
-                        # Map the record_type and classification to strings, defaulting to 'Proposal' and 'Basic Research' if not found in mappings
-                        record_type = record_type_mapping.get(record_type_str, 'Proposal')
-                        classification = classification_mapping.get(classification_str, 'Basic Research')
-
-                        researchpaper.objects.update_or_create(
-                            title=title,
-                            defaults={
-                                'abstract': item['Abstract'],
-                                'year': item['Year'],
-                                'record_type': record_type,
-                                'classification': classification,
-                                'psc_ed': item['PSCED'],
-                                'author': item['Author'],
-                                'recommendations': item.get('Recommendations', '')
+                        for item in batch:
+                            title = item['Title']
+                            record_type_mapping = {
+                                '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
+                                '2 (Thesis/Research)': 'Thesis/Research',
+                                '3 (Project)': 'Project',
+                                # Add mappings for other record types if needed
                             }
-                        )
-# Delete records that are not present in the new data
-                    researchpaper.objects.exclude(title__in=existing_titles).delete()
+
+                            classification_mapping = {
+                                '1 (Basic Research, 2 Applied Research)': 'Basic Research',
+                                '2 (Applied Research)': 'Applied Research',
+                                # Add mappings for other classifications if needed
+                            }
+
+                            record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
+                            classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
+
+                            record_type = record_type_mapping.get(record_type_str, 'Proposal')
+                            classification = classification_mapping.get(classification_str, 'Basic Research')
+
+                            researchpaper.objects.update_or_create(
+                                title=title,
+                                defaults={
+                                    'abstract': item['Abstract'],
+                                    'year': item['Year'],
+                                    'record_type': record_type,
+                                    'classification': classification,
+                                    'psc_ed': item['PSCED'],
+                                    'author': item['Author'],
+                                    'recommendations': item.get('Recommendations', '')
+                                }
+                            )
+
+                        # Delete records that are not present in the new data
+                        researchpaper.objects.exclude(title__in=existing_titles).delete()
 
                     return JsonResponse({'message': 'Data replaced successfully.'})
             except Exception as e:
@@ -86,7 +89,7 @@ def upload_and_replace_data(request):
             return JsonResponse({'error': 'Invalid file type. Only JSON files are accepted.'}, status=400)
     else:
         return JsonResponse({'error': 'No file provided in the request.'}, status=400)
-
+    
 # Thread Views (CRUD)
 class ThreadListCreateView(generics.ListCreateAPIView):
     queryset = Thread.objects.all()
