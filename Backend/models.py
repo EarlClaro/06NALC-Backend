@@ -56,10 +56,11 @@ class researchpaper(models.Model):
     title = models.CharField(max_length=255)
     abstract = models.TextField()
     year = models.IntegerField()
-    record_type = models.IntegerField(choices=TITLE_CHOICES)
-    classification = models.IntegerField(choices=CLASSIFICATION_CHOICES)
+    record_type = models.CharField(max_length=50, choices=TITLE_CHOICES)
+    classification = models.CharField(max_length=50, choices=CLASSIFICATION_CHOICES)
     psc_ed = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
+    recommendations = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title

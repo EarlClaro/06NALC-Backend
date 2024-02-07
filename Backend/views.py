@@ -45,15 +45,15 @@ def upload_and_replace_data(request):
                     # Insert new data from the JSON file
                     for item in data:
                         record_type_mapping = {
-                            '1 (Proposal, 2 Thesis/Research, 3 Project)': 1,
-                            '2 (Thesis/Research)': 2,
-                            '3 (Project)': 3,
+                            '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
+                            '2 (Thesis/Research)': 'Thesis/Research',
+                            '3 (Project)': 'Project',
                             # Add mappings for other record types if needed
                         }
 
                         classification_mapping = {
-                            '1 (Basic Research, 2 Applied Research)': 1,
-                            '2 (Applied Research)': 2,
+                            '1 (Basic Research, 2 Applied Research)': 'Basic Research',
+                            '2 (Applied Research)': 'Applied Research',
                             # Add mappings for other classifications if needed
                         }
 
@@ -61,11 +61,11 @@ def upload_and_replace_data(request):
                         record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
                         classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
 
-                        # Map the record_type and classification to integers, defaulting to 1 if not found in mappings
-                        record_type = record_type_mapping.get(record_type_str, 1)
-                        classification = classification_mapping.get(classification_str, 1)
+                        # Map the record_type and classification to strings, defaulting to 'Proposal' and 'Basic Research' if not found in mappings
+                        record_type = record_type_mapping.get(record_type_str, 'Proposal')
+                        classification = classification_mapping.get(classification_str, 'Basic Research')
 
-                        # Create the researchpaper object using the mapped values
+                        # Create the ResearchPaper object using the mapped values
                         researchpaper.objects.create(
                             title=item['Title'],
                             abstract=item['Abstract'],
@@ -73,7 +73,8 @@ def upload_and_replace_data(request):
                             record_type=record_type,
                             classification=classification,
                             psc_ed=item['PSCED'],
-                            author=item['Author'][:255]
+                            author=item['Author'],
+                            recommendations=item.get('Recommendations', '')  # New field added in the model
                         )
 
                     return JsonResponse({'message': 'Data replaced successfully.'})
