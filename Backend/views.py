@@ -30,7 +30,6 @@ db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
 
 # Admin views
-@csrf_exempt
 def upload_and_replace_data(request):
     if 'file' in request.FILES:
         uploaded_file = request.FILES['file']
