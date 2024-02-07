@@ -1,1 +1,1 @@
-web: gunicorn --workers=2 NALCBackend.wsgi
+web: gunicorn NALCBackend.wsgi
