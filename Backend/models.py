@@ -60,7 +60,7 @@ class researchpaper(models.Model):
     classification = models.CharField(max_length=50, choices=CLASSIFICATION_CHOICES)
     psc_ed = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    recommendations = models.TextField(blank=True, null=True)
+    recommendations = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.title
