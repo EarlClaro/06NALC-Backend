@@ -5,6 +5,7 @@ from langchain_community.utilities import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
 from langchain_openai import OpenAI
 import os
+import time
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 import json
@@ -38,44 +39,51 @@ def upload_and_replace_data(request):
             try:
                 with uploaded_file.open() as file:
                     data = json.load(file)
-
+                    
                     # Clear existing data
                     researchpaper.objects.all().delete()
 
                     # Insert new data from the JSON file
-                    for item in data:
-                        record_type_mapping = {
-                            '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
-                            '2 (Thesis/Research)': 'Thesis/Research',
-                            '3 (Project)': 'Project',
-                            # Add mappings for other record types if needed
-                        }
+                    total_rows = len(data)
+                    chunk_size = 100
+                    for i in range(0, total_rows, chunk_size):
+                        chunk_data = data[i:i+chunk_size]
+                        for item in chunk_data:
+                            record_type_mapping = {
+                                '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
+                                '2 (Thesis/Research)': 'Thesis/Research',
+                                '3 (Project)': 'Project',
+                                # Add mappings for other record types if needed
+                            }
 
-                        classification_mapping = {
-                            '1 (Basic Research, 2 Applied Research)': 'Basic Research',
-                            '2 (Applied Research)': 'Applied Research',
-                            # Add mappings for other classifications if needed
-                        }
+                            classification_mapping = {
+                                '1 (Basic Research, 2 Applied Research)': 'Basic Research',
+                                '2 (Applied Research)': 'Applied Research',
+                                # Add mappings for other classifications if needed
+                            }
 
-                        # Get the record_type and classification from the JSON data
-                        record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
-                        classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
+                            # Get the record_type and classification from the JSON data
+                            record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
+                            classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
 
-                        # Map the record_type and classification to strings, defaulting to 'Proposal' and 'Basic Research' if not found in mappings
-                        record_type = record_type_mapping.get(record_type_str, 'Proposal')
-                        classification = classification_mapping.get(classification_str, 'Basic Research')
+                            # Map the record_type and classification to strings, defaulting to 'Proposal' and 'Basic Research' if not found in mappings
+                            record_type = record_type_mapping.get(record_type_str, 'Proposal')
+                            classification = classification_mapping.get(classification_str, 'Basic Research')
 
-                        # Create the ResearchPaper object using the mapped values
-                        researchpaper.objects.create(
-                            title=item['Title'],
-                            abstract=item['Abstract'],
-                            year=item['Year'],
-                            record_type=record_type,
-                            classification=classification,
-                            psc_ed=item['PSCED'],
-                            author=item['Author'],
-                            recommendations=item.get('Recommendations', '')  # New field added in the model
-                        )
+                            # Create the ResearchPaper object using the mapped values
+                            researchpaper.objects.create(
+                                title=item['Title'],
+                                abstract=item['Abstract'],
+                                year=item['Year'],
+                                record_type=record_type,
+                                classification=classification,
+                                psc_ed=item['PSCED'],
+                                author=item['Author'],
+                                recommendations=item.get('Recommendations', '')  # New field added in the model
+                            )
+                        progress = int((i + chunk_size) / total_rows * 100)
+                        if progress % 20 == 0:  # Send progress update every 20%
+                            return JsonResponse({'progress': progress})
 
                     return JsonResponse({'message': 'Data replaced successfully.'})
             except Exception as e:
