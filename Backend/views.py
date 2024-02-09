@@ -20,6 +20,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 from django.core.paginator import Paginator
+from django.http import StreamingHttpResponse
 
 os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
 # Create the SQLDatabase instance with the MySQL connection URI
@@ -83,15 +84,19 @@ def upload_and_replace_data(request):
                             )
                         progress = int((i + chunk_size) / total_rows * 100)
                         if progress % 20 == 0:  # Send progress update every 20%
-                            return JsonResponse({'progress': progress})
+                            yield f"data: {json.dumps({'progress': progress})}\n\n"
 
-                    return JsonResponse({'message': 'Data replaced successfully.'})
+                    yield f"data: {json.dumps({'message': 'Data replaced successfully.'})}\n\n"
             except Exception as e:
-                return JsonResponse({'error': f'An error occurred while processing the file: {str(e)}'}, status=400)
+                yield f"data: {json.dumps({'error': f'An error occurred while processing the file: {str(e)}'})}\n\n"
         else:
-            return JsonResponse({'error': 'Invalid file type. Only JSON files are accepted.'}, status=400)
+            yield f"data: {json.dumps({'error': 'Invalid file type. Only JSON files are accepted.'})}\n\n"
     else:
-        return JsonResponse({'error': 'No file provided in the request.'}, status=400)
+        yield f"data: {json.dumps({'error': 'No file provided in the request.'})}\n\n"
+
+@csrf_exempt
+def upload_and_replace_data_stream(request):
+    return StreamingHttpResponse(upload_and_replace_data(request), content_type='text/event-stream')
 
 # Thread Views (CRUD)
 class ThreadListCreateView(generics.ListCreateAPIView):

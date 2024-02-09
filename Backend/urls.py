@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views  # Import your views module
-from .views import ThreadListCreateView, ThreadDetailView, UserThreadListView, MessageCreateView, MessageListView, upload_and_replace_data, UserRegisterView, UserLoginView, UserUpdateView, UserDetailsView, DeleteAllThreads
+from .views import ThreadListCreateView, ThreadDetailView, UserThreadListView, MessageCreateView, MessageListView, upload_and_replace_data, UserRegisterView, UserLoginView, UserUpdateView, upload_and_replace_data_stream, UserDetailsView, DeleteAllThreads
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 from django.conf import settings
 from django.conf.urls.static import static
@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/messages/thread/<int:thread_id>/', MessageListView.as_view(), name='message-list'),
     path('api/users/threads/', UserThreadListView.as_view(), name='thread-list'),
     path('upload-and-replace-data/', views.upload_and_replace_data, name='upload-and-replace-data'),
+    path('upload-and-replace-data-stream/', views.upload_and_replace_data_stream, name='upload-and-replace-data-stream'),
     path('api/users/register/', UserRegisterView.as_view(), name='user-register'),
     path('api/users/login/', UserLoginView.as_view(), name='user-login'),
     path('api/users/details/', UserDetailsView.as_view(), name='user-details'),
