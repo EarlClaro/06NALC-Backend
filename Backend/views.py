@@ -49,35 +49,13 @@ def upload_and_replace_data(request):
                     for i in range(0, total_rows, chunk_size):
                         chunk_data = data[i:i+chunk_size]
                         for item in chunk_data:
-                            record_type_mapping = {
-                                '1 (Proposal, 2 Thesis/Research, 3 Project)': 'Proposal',
-                                '2 (Thesis/Research)': 'Thesis/Research',
-                                '3 (Project)': 'Project',
-                                # Add mappings for other record types if needed
-                            }
-
-                            classification_mapping = {
-                                '1 (Basic Research, 2 Applied Research)': 'Basic Research',
-                                '2 (Applied Research)': 'Applied Research',
-                                # Add mappings for other classifications if needed
-                            }
-
-                            # Get the record_type and classification from the JSON data
-                            record_type_str = item['Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)']
-                            classification_str = item['Classification \n(1 - Basic Research, 2 - Applied Research)\\']
-
-                            # Map the record_type and classification to strings, defaulting to 'Proposal' and 'Basic Research' if not found in mappings
-                            record_type = record_type_mapping.get(record_type_str, 'Proposal')
-                            classification = classification_mapping.get(classification_str, 'Basic Research')
 
                             # Create the ResearchPaper object using the mapped values
                             researchpaper.objects.create(
                                 title=item['Title'],
                                 abstract=item['Abstract'],
                                 year=item['Year'],
-                                record_type=record_type,
-                                classification=classification,
-                                psc_ed=item['PSCED'],
+                                classification=['Classification'],
                                 author=item['Author'],
                                 recommendations=item.get('Recommendations', '')  # New field added in the model
                             )
