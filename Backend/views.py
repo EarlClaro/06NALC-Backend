@@ -55,7 +55,7 @@ def upload_and_replace_data(request):
                                 title=item['Title'],
                                 abstract=item['Abstract'],
                                 year=item['Year'],
-                                classification=['Classification'],
+                                classification=item['Classification'],
                                 author=item['Author'],
                                 recommendations=item.get('Recommendations', '')  # New field added in the model
                             )
