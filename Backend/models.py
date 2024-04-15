@@ -45,12 +45,27 @@ class researchpaper(models.Model):
     title = models.CharField(max_length=255)
     abstract = models.TextField()
     year = models.IntegerField()
-    classification = models.CharField(max_length=255)
+    RECORD_TYPE_CHOICES = [
+        ('1-Proposal', 'Proposal'),
+        ('2-Thesis/Research', 'Thesis/Research'),
+        ('3-Project', 'Project'),
+    ]
+    record_type = models.CharField(max_length=50, choices=RECORD_TYPE_CHOICES)
+    CLASSIFICATION_CHOICES = [
+        ('1-Basic Research', 'Basic Research'),
+        ('2-Applied Research', 'Applied Research'),
+    ]
+    classification = models.CharField(max_length=20, choices=CLASSIFICATION_CHOICES)
     author = models.CharField(max_length=255)
+    psc_ed = models.CharField(max_length=255)  # Add this field
     recommendations = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.title
+
+
+
+
 
 class Thread(models.Model):
     thread_id = models.AutoField(primary_key=True)

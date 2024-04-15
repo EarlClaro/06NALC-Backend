@@ -79,7 +79,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", "https://nalc.vercel.app/" # React development server
+    "http://localhost:3000", 
+
 ]
 
 ROOT_URLCONF = 'NALCBackend.urls'
@@ -109,15 +110,19 @@ WSGI_APPLICATION = 'NALCBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nalc-schema',
-        'USER': 'nalc',
-        'PASSWORD': '!p4msCitU',
-        'HOST': 'nalc.mysql.database.azure.com',
+        'NAME': 'nalc_schema',
+        'USER': 'root',
+        'PASSWORD': 'new_password',
         'PORT': '3306',
+        'HOST': 'localhost',
         'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -168,6 +173,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'nalcs723@gmail.com'
-EMAIL_HOST_PASSWORD = 'nalcSupportTeam2023'
-DEFAULT_FROM_EMAIL = 'nalcs723@gmail.com'
+EMAIL_HOST_USER = 'ipamsdevteam2024@gmail.com'
+EMAIL_HOST_PASSWORD = 'ufub nxrb odrd ismt'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+

@@ -23,7 +23,7 @@ from django.core.paginator import Paginator
 
 os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
 # Create the SQLDatabase instance with the MySQL connection URI
-db = SQLDatabase.from_uri(f"mysql://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}", include_tables=["backend_researchpaper"])
+db = SQLDatabase.from_uri(f"mysql://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}", include_tables=[])
 
 llm = OpenAI(temperature=0, verbose=True)
 
@@ -49,13 +49,18 @@ def upload_and_replace_data(request):
                     for i in range(0, total_rows, chunk_size):
                         chunk_data = data[i:i+chunk_size]
                         for item in chunk_data:
+                            # Extract code and description from 'record_type' value
+                            record_type_value = item.get('Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)', '')
+                            code, _ = record_type_value.split('-', 1)  # Split at the first dash
+                            code = code.strip()
 
-                            # Create the ResearchPaper object using the mapped values
+                            # Create the ResearchPaper object using the extracted code
                             researchpaper.objects.create(
                                 title=item['Title'],
                                 abstract=item['Abstract'],
                                 year=item['Year'],
-                                classification=item['Classification'],
+                                record_type=code,
+                                classification=item['Classification \n(1 - Basic Research, 2 - Applied Research)\\'],
                                 author=item['Author'],
                                 recommendations=item.get('Recommendations', '')  # New field added in the model
                             )
@@ -70,6 +75,7 @@ def upload_and_replace_data(request):
             return JsonResponse({'error': 'Invalid file type. Only JSON files are accepted.'}, status=400)
     else:
         return JsonResponse({'error': 'No file provided in the request.'}, status=400)
+    
 
 # Thread Views (CRUD)
 class ThreadListCreateView(generics.ListCreateAPIView):
