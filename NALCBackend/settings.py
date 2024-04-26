@@ -110,7 +110,7 @@ WSGI_APPLICATION = 'NALCBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nalc_schema',
+        'NAME': 'ipamsdjango',
         'USER': 'root',
         'PASSWORD': 'new_password',
         'PORT': '3306',

@@ -39,7 +39,7 @@ def upload_and_replace_data(request):
             try:
                 with uploaded_file.open() as file:
                     data = json.load(file)
-                    
+
                     # Clear existing data
                     researchpaper.objects.all().delete()
 
@@ -59,10 +59,16 @@ def upload_and_replace_data(request):
                                 title=item['Title'],
                                 abstract=item['Abstract'],
                                 year=item['Year'],
-                                record_type=code,
-                                classification=item['Classification \n(1 - Basic Research, 2 - Applied Research)\\'],
-                                author=item['Author'],
-                                recommendations=item.get('Recommendations', '')  # New field added in the model
+                                record_type_id=None,  # Adjust based on your data source
+                                adviser_id=None,  # Adjust based on your data source
+                                classification_id=item['Classification \n(1 - Basic Research, 2 - Applied Research)\\'],
+                                representative=item['Representative'],  # Adjust based on your data source
+                                year_accomplished=item['Year Accomplished'],  # Adjust based on your data source
+                                year_completed=item.get('Year Completed'),  # Adjust based on your data source
+                                is_ip=item.get('Is IP'),  # Adjust based on your data source
+                                for_commercialization=item.get('For Commercialization'),  # Adjust based on your data source
+                                date_created=item.get('Date Created'),  # Adjust based on your data source
+                                is_marked=item.get('Is Marked'),  # Adjust based on your data source
                             )
                         progress = int((i + chunk_size) / total_rows * 100)
                         if progress % 20 == 0:  # Send progress update every 20%

@@ -42,26 +42,25 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # research paper model
 class researchpaper(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=100)
     abstract = models.TextField()
-    year = models.IntegerField()
-    RECORD_TYPE_CHOICES = [
-        ('1-Proposal', 'Proposal'),
-        ('2-Thesis/Research', 'Thesis/Research'),
-        ('3-Project', 'Project'),
-    ]
-    record_type = models.CharField(max_length=50, choices=RECORD_TYPE_CHOICES)
-    CLASSIFICATION_CHOICES = [
-        ('1-Basic Research', 'Basic Research'),
-        ('2-Applied Research', 'Applied Research'),
-    ]
-    classification = models.CharField(max_length=20, choices=CLASSIFICATION_CHOICES)
-    author = models.CharField(max_length=255)
-    psc_ed = models.CharField(max_length=255)  # Add this field
-    recommendations = models.TextField(blank=True, default='')
+    year = models.CharField(max_length=30)
+    record_type_id = models.BigIntegerField(null=True)
+    adviser_id = models.BigIntegerField(null=True)
+    classification_id = models.BigIntegerField()
+    representative = models.CharField(max_length=100)
+    year_accomplished = models.CharField(max_length=30)
+    year_completed = models.CharField(max_length=30, null=True)
+    is_ip = models.BooleanField()
+    for_commercialization = models.BooleanField()
+    date_created = models.DateTimeField()
+    is_marked = models.BooleanField()
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        db_table = 'backend_researchpaper'
 
 
 
