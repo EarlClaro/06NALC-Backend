@@ -42,26 +42,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # research paper model
 class researchpaper(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
     abstract = models.TextField()
-    year = models.CharField(max_length=30)
-    record_type_id = models.BigIntegerField(null=True)
-    adviser_id = models.BigIntegerField(null=True)
-    classification_id = models.BigIntegerField()
-    representative = models.CharField(max_length=100)
-    year_accomplished = models.CharField(max_length=30)
-    year_completed = models.CharField(max_length=30, null=True)
-    is_ip = models.BooleanField()
-    for_commercialization = models.BooleanField()
-    date_created = models.DateTimeField()
-    is_marked = models.BooleanField()
+    year = models.IntegerField()
+    classification = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    recommendations = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.title
-
-    class Meta:
-        db_table = 'backend_researchpaper'
-
 
 
 

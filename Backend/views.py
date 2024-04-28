@@ -21,6 +21,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 from django.core.paginator import Paginator
 
+
+
 os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
 # Create the SQLDatabase instance with the MySQL connection URI
 db = SQLDatabase.from_uri(f"mysql://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}", include_tables=[])
@@ -29,6 +31,11 @@ llm = OpenAI(temperature=0, verbose=True)
 
 db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import researchpaper
 
 # Admin views
 @csrf_exempt
@@ -39,7 +46,7 @@ def upload_and_replace_data(request):
             try:
                 with uploaded_file.open() as file:
                     data = json.load(file)
-
+                    
                     # Clear existing data
                     researchpaper.objects.all().delete()
 
@@ -49,26 +56,15 @@ def upload_and_replace_data(request):
                     for i in range(0, total_rows, chunk_size):
                         chunk_data = data[i:i+chunk_size]
                         for item in chunk_data:
-                            # Extract code and description from 'record_type' value
-                            record_type_value = item.get('Record Type \n(1 - Proposal, 2 - Thesis/Research, 3 - Project)', '')
-                            code, _ = record_type_value.split('-', 1)  # Split at the first dash
-                            code = code.strip()
 
-                            # Create the ResearchPaper object using the extracted code
+                            # Create the ResearchPaper object using the mapped values
                             researchpaper.objects.create(
                                 title=item['Title'],
                                 abstract=item['Abstract'],
                                 year=item['Year'],
-                                record_type_id=None,  # Adjust based on your data source
-                                adviser_id=None,  # Adjust based on your data source
-                                classification_id=item['Classification \n(1 - Basic Research, 2 - Applied Research)\\'],
-                                representative=item['Representative'],  # Adjust based on your data source
-                                year_accomplished=item['Year Accomplished'],  # Adjust based on your data source
-                                year_completed=item.get('Year Completed'),  # Adjust based on your data source
-                                is_ip=item.get('Is IP'),  # Adjust based on your data source
-                                for_commercialization=item.get('For Commercialization'),  # Adjust based on your data source
-                                date_created=item.get('Date Created'),  # Adjust based on your data source
-                                is_marked=item.get('Is Marked'),  # Adjust based on your data source
+                                classification=item['Classification'],
+                                author=item['Author'],
+                                recommendations=item.get('Recommendations', '')  # New field added in the model
                             )
                         progress = int((i + chunk_size) / total_rows * 100)
                         if progress % 20 == 0:  # Send progress update every 20%
@@ -81,6 +77,7 @@ def upload_and_replace_data(request):
             return JsonResponse({'error': 'Invalid file type. Only JSON files are accepted.'}, status=400)
     else:
         return JsonResponse({'error': 'No file provided in the request.'}, status=400)
+
     
 
 # Thread Views (CRUD)
