@@ -23,7 +23,37 @@ from django.core.paginator import Paginator
 
 
 
-os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
+from django.db import connections
+from django.utils.timezone import now
+
+def get_openai_api_key():
+    try:
+        with connections['default'].cursor() as cursor:
+            cursor.execute("""
+                SELECT api_key FROM backend_openai_api WHERE id = 1
+            """)
+            row = cursor.fetchone()
+            if row:
+                print(f"API Key found: {row[0]}")
+                return row[0]
+            else:
+                print("No entry found with id = 1.")
+                return None
+    except Exception as e:
+        print(f"Error retrieving API key: {e}")
+        return None
+
+# Fetch and set the OpenAI API key from the database
+openai_api_key = get_openai_api_key()
+if openai_api_key:
+    os.environ["OPENAI_API_KEY"] = openai_api_key
+else:
+    raise ValueError("OpenAI API key not found.")
+
+
+# Initialize OpenAI with the API key
+llm = OpenAI(temperature=0, verbose=True)
+
 # Create the SQLDatabase instance with the MySQL connection URI
 db = SQLDatabase.from_uri(f"mysql://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}", include_tables=[])
 
@@ -32,10 +62,8 @@ llm = OpenAI(temperature=0, verbose=True)
 db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from .models import researchpaper
+
+
 
 # Admin views
 @csrf_exempt
@@ -227,29 +255,29 @@ class UserRegisterView(generics.CreateAPIView):
         # Invalid request, email is required
         return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
+from .serializers import UserLoginSerializer
+
 class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
-        serializer = UserLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        permission_classes = [AllowAny]
+        email = request.data.get('email')
+        try:
+            user = User.objects.get(email=email)  # Only use email for login
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
 
-        user = serializer.validated_data['user']
+            response_data = {
+                'message': 'Login successful',
+                'email': user.email,
+                'name': user.name,
+                'access_token': access_token,
+                'is_superuser': user.is_superuser,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        user = serializer.validated_data['user']
-        user = serializer.validated_data['user']
-        
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-
-        response_data = {
-            'message': 'Login successful',
-            'email': user.email,
-            'name': user.name,
-            'access_token': access_token,
-            'is_superuser': serializer.validated_data['is_superuser'],
-        }
-        
-        return Response(response_data, status=status.HTTP_200_OK)
 
 class UserUpdateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -271,3 +299,4 @@ class UserDetailsView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user 
+

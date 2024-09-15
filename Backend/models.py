@@ -40,14 +40,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         return self.name
 
-# research paper model
+
+
 class researchpaper(models.Model):
     title = models.CharField(max_length=255)
     abstract = models.TextField()
     year = models.IntegerField()
-    classification = models.CharField(max_length=255)
+    record_type_choices = (
+        ('1-Proposal', 'Proposal'),
+        ('2-Thesis/Research', 'Thesis/Research'),
+        ('3-Project', 'Project'),
+    )
+    record_type = models.CharField(max_length=100, choices=record_type_choices)
+    classification_choices = (
+        (1, 'Basic Research'),
+        (2, 'Applied Research'),
+    )
+    classification = models.IntegerField(choices=classification_choices)
     author = models.CharField(max_length=255)
-    recommendations = models.TextField(blank=True, default='')
+    recommendations = models.TextField(blank=True)
 
     def __str__(self):
         return self.title
@@ -65,3 +76,13 @@ class Message(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
     message_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+from django.db import models, connections
+
+class BackendOpenAIAPI(models.Model):
+    api_key = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'backend_openai_api'
+        managed = False  # No migrations will be created for this model

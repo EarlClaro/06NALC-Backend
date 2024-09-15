@@ -55,14 +55,19 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'Backend.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ALGORITHM': 'HS256',  # Ensure this matches IPAMS token algorithm
+    'SIGNING_KEY': '6Ld-guEbAAAAANAgbmQI2Ph6knhKsOglaOEEuyp3',  # Use the same secret key as in IPAMS
 }
 
 
@@ -80,6 +85,10 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", 
+    'http://127.0.0.1:8001',
+    'http://localhost:8001',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
 
 ]
 
