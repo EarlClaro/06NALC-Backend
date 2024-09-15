@@ -118,12 +118,12 @@ WSGI_APPLICATION = 'NALCBackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+       'ENGINE': 'django.db.backends.mysql',
         'NAME': 'nalc_schema',
-        'USER': 'root',
-        'PASSWORD': 'new_password',
+        'USER': 'narralink',  # Replace with your Azure MySQL username
+        'PASSWORD': 'July82001Cl@ro',  # Replace with your Azure MySQL password
         'PORT': '3306',
-        'HOST': 'localhost',
+        'HOST': 'ipamsdjango.mysql.database.azure.com',  # Your Azure MySQL server hostname
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
